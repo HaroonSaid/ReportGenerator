@@ -6,6 +6,7 @@ using Palmmedia.ReportGenerator.Common;
 using Palmmedia.ReportGenerator.Logging;
 using Palmmedia.ReportGenerator.Properties;
 using Palmmedia.ReportGenerator.Reporting;
+using Amazon;
 
 namespace Palmmedia.ReportGenerator
 {
@@ -55,13 +56,18 @@ namespace Palmmedia.ReportGenerator
             IEnumerable<string> sourceDirectories,
             IEnumerable<string> assemblyFilters,
             IEnumerable<string> classFilters,
-            string verbosityLevel)
+            string verbosityLevel,
+            string s3HistoryBucketName = "",
+            string s3HistoryDirectoryName = "",
+            string awsAccessKey = "",
+            string awsSecret = "",
+            string awsRegion = "")
         {
             if (reportBuilderFactory == null)
             {
                 throw new ArgumentNullException(nameof(reportBuilderFactory));
             }
-            
+
             if (reportFilePatterns == null)
             {
                 throw new ArgumentNullException(nameof(reportFilePatterns));
@@ -127,6 +133,11 @@ namespace Palmmedia.ReportGenerator
                 this.verbosityLevelValid = Enum.TryParse<VerbosityLevel>(verbosityLevel, true, out parsedVerbosityLevel);
                 this.VerbosityLevel = parsedVerbosityLevel;
             }
+            S3HistoryBucketName = s3HistoryBucketName;
+            S3HistoryDirectoryName = s3HistoryDirectoryName;
+            AWSAccessKey = awsAccessKey;
+            AWSSecret = awsSecret;
+            AWSRegion = string.IsNullOrEmpty(awsRegion) ? RegionEndpoint.USEast1 : RegionEndpoint.GetBySystemName(awsRegion);
         }
 
         /// <summary>
@@ -148,7 +159,35 @@ namespace Palmmedia.ReportGenerator
         /// Gets the history directory.
         /// </summary>
         public string HistoryDirectory { get; }
-
+        /// <summary>
+        /// AWS S3 History Bucket Name
+        /// </summary>
+        public string S3HistoryBucketName { get; }
+        /// <summary>
+        /// S3 Hisory Directory Name
+        /// </summary>
+        public string S3HistoryDirectoryName { get; }
+        /// <summary>
+        /// AWS Access Key
+        /// </summary>
+        public string AWSAccessKey { get; }
+        /// <summary>
+        /// AWS Secret
+        /// </summary>
+        public string AWSSecret { get; }
+        /// <summary>
+        /// AWS Region
+        /// </summary>
+        public RegionEndpoint AWSRegion { get; }
+        public bool IsS3HistoryNeeded
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(HistoryDirectory) &&
+                  !string.IsNullOrEmpty(S3HistoryBucketName) &&
+                  !string.IsNullOrEmpty(S3HistoryDirectoryName);
+            }
+        }
         /// <summary>
         /// Gets the type of the report.
         /// </summary>

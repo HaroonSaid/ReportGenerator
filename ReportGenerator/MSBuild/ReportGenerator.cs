@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using Amazon.S3;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Palmmedia.ReportGenerator.Reporting;
+using Amazon;
 
 namespace Palmmedia.ReportGenerator.MSBuild
 {
@@ -84,7 +87,26 @@ namespace Palmmedia.ReportGenerator.MSBuild
         /// The verbosity level.
         /// </value>
         public string VerbosityLevel { get; set; }
-
+        /// <summary>
+        /// S3 Bucket Name
+        /// </summary>
+        public string S3BucketName { get; set; }
+        /// <summary>
+        /// S3 Prefix Key (Directory)
+        /// </summary>
+        public string S3DirectoryName { get; set; }
+        /// <summary>
+        /// Profile Name
+        /// </summary>
+        public string AccessKey { get; set; }
+        /// <summary>
+        /// AWS Secret
+        /// </summary>
+        public string Secret { get; set; }
+        /// <summary>
+        /// AWs Region
+        /// </summary>
+        public string Region { get; set; }
         /// <summary>
         /// When overridden in a derived class, executes the task.
         /// </summary>
@@ -102,7 +124,7 @@ namespace Palmmedia.ReportGenerator.MSBuild
 
             ITaskItem[] assemblyFilters = this.AssemblyFilters ?? this.Filters;
 
-            ReportConfiguration configuration = new ReportConfiguration(
+            var config = new ReportConfiguration(
                 new MefReportBuilderFactory(),
                 this.ReportFiles == null ? Enumerable.Empty<string>() : this.ReportFiles.Select(r => r.ItemSpec),
                 this.TargetDirectory,
@@ -111,9 +133,22 @@ namespace Palmmedia.ReportGenerator.MSBuild
                 this.SourceDirectories == null ? Enumerable.Empty<string>() : this.SourceDirectories.Select(r => r.ItemSpec),
                 assemblyFilters == null ? Enumerable.Empty<string>() : assemblyFilters.Select(r => r.ItemSpec),
                 this.ClassFilters == null ? Enumerable.Empty<string>() : this.ClassFilters.Select(r => r.ItemSpec),
-                this.VerbosityLevel);
-
-            return new Generator().GenerateReport(configuration);
+                this.VerbosityLevel, S3BucketName, S3DirectoryName, AccessKey, Region);
+            if (config.IsS3HistoryNeeded)
+            {
+                var client = string.IsNullOrEmpty(config.AWSAccessKey) ? new AmazonS3Client(config.AWSRegion) : new AmazonS3Client(config.AWSAccessKey, config.AWSSecret, config.AWSRegion);
+                var s3HistoryRepository = new S3HistoryRepository(client);
+                s3HistoryRepository.Restore(config.S3HistoryBucketName, config.S3HistoryBucketName, config.HistoryDirectory);
+            }
+            var generator = new Generator();
+            var rtn = generator.GenerateReport(config);
+            if (config.IsS3HistoryNeeded)
+            {
+                var client = string.IsNullOrEmpty(config.AWSAccessKey) ? new AmazonS3Client(config.AWSRegion) : new AmazonS3Client(config.AWSAccessKey, config.AWSSecret, config.AWSRegion);
+                var s3HistoryRepository = new S3HistoryRepository(client);
+                s3HistoryRepository.Save(config.HistoryDirectory, config.S3HistoryBucketName, config.S3HistoryDirectoryName);
+            }
+            return rtn;
         }
     }
 }

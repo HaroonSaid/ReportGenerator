@@ -150,7 +150,11 @@ namespace Palmmedia.ReportGenerator
             var assemblyFilters = new string[] { };
             var classFilters = new string[] { };
             string verbosityLevel = null;
-
+            string s3HistoryBucketName = string.Empty,
+                s3HistoryDirectoryName = string.Empty,
+                awsAccessKey = null,
+                awsSecret = null,
+                awsRegion = string.Empty;
             string value = null;
 
             if (namedArguments.TryGetValue("REPORTS", out value))
@@ -200,8 +204,29 @@ namespace Palmmedia.ReportGenerator
             {
                 verbosityLevel = value;
             }
+            if (namedArguments.TryGetValue("S3BUCKETNAME", out value))
+            {
+                s3HistoryBucketName = value;
+            }
+            if (namedArguments.TryGetValue("S3DIRECTORYNAME", out value))
+            {
+                s3HistoryDirectoryName = value;
+            }
+            if (namedArguments.TryGetValue("ACCESSKEY", out value))
+            {
+                awsAccessKey = value;
+            }
+            if (namedArguments.TryGetValue("SECRET", out value))
+            {
+                awsSecret = value;
+            }
+            if (namedArguments.TryGetValue("S3REGION", out value))
+            {
+                awsRegion = value;
+            }
 
-            return new ReportConfiguration(this.reportBuilderFactory, reportFilePatterns, targetDirectory, historyDirectory, reportTypes, sourceDirectories, assemblyFilters, classFilters, verbosityLevel);
+            return new ReportConfiguration(this.reportBuilderFactory, reportFilePatterns, targetDirectory, historyDirectory, reportTypes, sourceDirectories, assemblyFilters, classFilters, verbosityLevel,
+                s3HistoryBucketName, s3HistoryDirectoryName, awsAccessKey, awsSecret, awsRegion);
         }
 
         /// <summary>
