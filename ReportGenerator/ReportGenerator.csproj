@@ -116,6 +116,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AWS\S3HistoryRepository.cs" />
     <Compile Include="Common\FileSearch.cs" />
     <Compile Include="IReportGenerator.cs" />
     <Compile Include="Logging\ConsoleLogger.cs" />
@@ -198,7 +199,6 @@
     <Compile Include="Reporting\HistoryReportGenerator.cs" />
     <Compile Include="Reporting\ReportGenerator.cs" />
     <Compile Include="Logging\VerbosityLevel.cs" />
-    <Compile Include="Reporting\S3HistoryRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Parser\Analysis\Class.cs" />

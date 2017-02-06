@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Palmmedia.ReportGenerator.Reporting;
 using Amazon;
+using Palmmedia.ReportGenerator.AWS;
 
 namespace Palmmedia.ReportGenerator.MSBuild
 {

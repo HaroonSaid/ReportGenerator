@@ -1,14 +1,15 @@
-﻿using Amazon.S3;
+﻿using Amazon;
+using Amazon.S3;
 using Amazon.S3.Transfer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Palmmedia.ReportGenerator.Reporting;
+using Palmmedia.ReportGenerator.AWS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Palmmedia.ReportGenerator.Reporting.Tests
+namespace Palmmedia.ReportGenerator.AWS.Tests
 {
     [TestClass()]
     public class S3HistoryRepositoryTests
@@ -41,7 +42,6 @@ namespace Palmmedia.ReportGenerator.Reporting.Tests
             sut.Restore(request.BucketName, request.S3Directory, request.LocalDirectory);
             mockClient.Verify();
         }
-
         [TestMethod()]
         public void SaveTest()
         {
@@ -51,7 +51,7 @@ namespace Palmmedia.ReportGenerator.Reporting.Tests
             {
                 BucketName = "bucket1",
                 KeyPrefix = "somedirectory",
-                Directory = "C:\\temp"
+                Directory = "test"
             };
             mockClient.Setup(p => p.UploadDirectory(It.IsAny<TransferUtilityUploadDirectoryRequest>())).Verifiable();
             sut.Save(request.Directory, request.BucketName, request.KeyPrefix);

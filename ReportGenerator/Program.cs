@@ -3,6 +3,7 @@ using System.Linq;
 using Palmmedia.ReportGenerator.Reporting;
 using Amazon.S3;
 using Amazon;
+using Palmmedia.ReportGenerator.AWS;
 
 namespace Palmmedia.ReportGenerator
 {
